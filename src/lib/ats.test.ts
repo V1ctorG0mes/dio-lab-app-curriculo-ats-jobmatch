@@ -50,8 +50,8 @@ describe("History", () => {
 
   it("summarizes total, average and best score", () => {
     const s = summarize([
-      { ...SEED_HISTORY[0], score: 60 },
-      { ...SEED_HISTORY[1], score: 90, title: "Tech Lead" },
+      { ...SEED_HISTORY[0]!, score: 60 },
+      { ...SEED_HISTORY[1]!, score: 90, title: "Tech Lead" },
     ]);
     expect(s.total).toBe(2);
     expect(s.average).toBe(75);
