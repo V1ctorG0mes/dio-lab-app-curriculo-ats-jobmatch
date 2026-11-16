@@ -235,15 +235,20 @@ function stripMarkdown(line: string): string {
     .trim();
 }
 
+const PAGE_FOOTER_RE = /\b(?:p[aá]gina|page)\s+\d+\s*(?:de|of|\/)\s*\d+\s*$/i;
+const BARE_BULLET_RE = /^\s*[-*•●▪►▶✓✔★☆◆◇■□➤→]\s*$/;
+
 function detectHeading(raw: string): { key: SectionKey | null; title: string } | null {
   const cleaned = stripMarkdown(raw).replace(/:$/, "").trim();
   if (!cleaned) return null;
   const norm = normalize(cleaned);
   const isMarkdownHeading = /^\s*#{1,6}\s/.test(raw);
-  const shortEnough = cleaned.length <= 40;
+  const isAllCaps = cleaned === cleaned.toUpperCase() && /[A-ZÀ-Ú]/.test(cleaned);
+  const shortEnough = cleaned.length <= (isAllCaps ? 65 : 40);
   if (shortEnough) {
     for (const p of SECTION_PATTERNS) {
-      const plainHeading = cleaned.split(" ").length <= 4 && !/[:,;]/.test(cleaned);
+      const maxWords = isAllCaps ? 7 : 4;
+      const plainHeading = cleaned.split(" ").length <= maxWords && !/[:,;]/.test(cleaned);
       if (p.re.test(norm) && (isMarkdownHeading || plainHeading)) {
         return { key: p.key, title: p.title };
       }
@@ -268,6 +273,9 @@ function parseResume(text: string): ParsedResume {
   let lastWasTableRow = false;
 
   for (const rawLine of lines) {
+    if (PAGE_FOOTER_RE.test(rawLine.trim()) || BARE_BULLET_RE.test(rawLine)) {
+      continue;
+    }
     if (/^\s*\|?\s*:?-{3,}/.test(rawLine) || /^\s*(-{3,}|_{3,}|\*{3,}|={3,})\s*$/.test(rawLine)) {
       // A markdown table rule follows the header row: drop that header.
       if (lastWasTableRow && current) current.lines.pop();

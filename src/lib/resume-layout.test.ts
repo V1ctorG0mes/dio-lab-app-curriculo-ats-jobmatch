@@ -39,4 +39,49 @@ describe("A4 résumé layout", () => {
       .map((r) => r.text);
     expect(strong).toEqual(["Desenvolvi", "18%"]);
   });
+
+  it("does not turn PDF-wrapped prose sentences with commas into job headers and strips footers/bare bullets", () => {
+    expect(parseEntryHeader("Atuação em rotina corporativa dinâmica, interagindo com diversas áreas da empresa para")).toBeNull();
+    expect(parseEntryHeader("Durante o curso, tenho desenvolvido forte base em programação backend")).toBeNull();
+
+    const pdfLikeResume = [
+      "CARLOS MENDES",
+      "São Paulo, SP | carlos.mendes@example.com",
+      "PERFIL PROFISSIONAL",
+      "Estudante de Análise e Desenvolvimento de Sistemas (Universidade Exemplo)",
+      "focado na resolução de problemas.",
+      "EXPERIÊNCIA PROFISSIONAL",
+      "Empresa Alfa - Divisão Sul (Multinacional) Jul/2023 – Out/2024",
+      "Assistente Júnior, Setor Administrativo",
+      "Atuação em rotina corporativa dinâmica, interagindo com diversas áreas",
+      "para acompanhamento de demandas.",
+      "Carlos Mendes - Currículo Página 1 de 2",
+      "COMPETÊNCIAS TÉCNICAS IDIOMAS E CERTIFICAÇÕES",
+      "•",
+      "Tecnologia e Dev: Java (POO), Python,",
+      "JavaScript, HTML/CSS.",
+    ].join("\n");
+
+    const { resume } = analyze("Vaga JavaScript HTML CSS", pdfLikeResume);
+    const resumo = resume.sections.find((s) => s.title === "RESUMO PROFISSIONAL")!;
+    const resumoBlocks = layoutSection(resumo);
+    expect(resumoBlocks).toEqual([
+      { type: "paragraph", text: "Estudante de Análise e Desenvolvimento de Sistemas (Universidade Exemplo) focado na resolução de problemas." },
+    ]);
+
+    const exp = resume.sections.find((s) => s.title === "EXPERIÊNCIA PROFISSIONAL")!;
+    const expBlocks = layoutSection(exp);
+    expect(expBlocks).toHaveLength(1);
+    expect(expBlocks[0]).toMatchObject({
+      type: "entry",
+      title: "Empresa Alfa",
+      org: "Divisão Sul (Multinacional)",
+      period: "Jul/2023 – Out/2024",
+    });
+
+    // Footer and bare bullets must be stripped
+    expect(JSON.stringify(resume)).not.toContain("Página 1 de 2");
+    const skills = resume.sections.find((s) => s.title === "COMPETÊNCIAS TÉCNICAS")!;
+    expect(skills.lines).not.toContain("•");
+  });
 });

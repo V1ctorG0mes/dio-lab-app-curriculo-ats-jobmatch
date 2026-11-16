@@ -78,15 +78,23 @@ function SectionBlock({ block }: { block: LayoutBlock }) {
         </div>
 
         {block.notes.length > 0 && (
-          <div className="text-[12px] text-slate-600 leading-normal">
-            {block.notes.map((note, idx) => (
-              <p key={idx}>{note}</p>
-            ))}
+          <div className="space-y-1 text-[12.5px]">
+            {block.notes.map((note, idx) => {
+              const isSubtitle = idx === 0 && note.length <= 95 && !/[.!?]$/.test(note);
+              return (
+                <p
+                  key={idx}
+                  className={isSubtitle ? "font-semibold text-violet-700" : "text-slate-600 leading-relaxed"}
+                >
+                  {note}
+                </p>
+              );
+            })}
           </div>
         )}
 
         {block.bullets.length > 0 && (
-          <ul className="space-y-1 pl-4 text-[13px] leading-relaxed text-slate-700 list-disc">
+          <ul className="space-y-1 pl-4 text-[12.5px] leading-relaxed text-slate-700 list-disc">
             {block.bullets.map((bullet, idx) => (
               <li key={idx} className="pl-1">
                 <BulletText text={bullet} />
@@ -106,36 +114,36 @@ export function ResumeSheet({ resume, className }: { resume: OptimizedResume; cl
   return (
     <article
       className={cn(
-        "resume-sheet mx-auto w-full max-w-[794px] bg-white px-8 py-8 sm:px-12 sm:py-12 font-resume text-[13px] leading-relaxed text-slate-800 shadow-md ring-1 ring-slate-200/80 rounded-sm print:rounded-none print:shadow-none print:ring-0 print:p-0",
+        "resume-sheet mx-auto w-full max-w-[794px] bg-white px-8 py-7 sm:px-10 sm:py-9 font-resume text-[12.5px] leading-normal text-slate-800 shadow-md ring-1 ring-slate-200/80 rounded-sm print:rounded-none print:shadow-none print:ring-0 print:p-0",
         className,
       )}
       style={{ minHeight: "min(1123px, 140vw)" }}
     >
       {/* Header: Bold name + contact line separated by • */}
-      <header className="border-b border-slate-200 pb-3.5 mb-4 text-center sm:text-left">
+      <header className="border-b border-slate-200 pb-3 mb-3.5 text-center sm:text-left">
         <h2 className="font-resume text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 uppercase">
           {resume.name}
         </h2>
         {resume.contact.length > 0 && (
-          <p className="mt-1.5 text-[12px] text-slate-600 tracking-normal font-normal">
+          <p className="mt-1 text-[12px] text-slate-600 tracking-normal font-normal">
             {resume.contact.join(" • ")}
           </p>
         )}
       </header>
 
       {/* Sections: Violet uppercase title with thin line and subtle accent bar */}
-      <div className="space-y-4">
+      <div className="space-y-3.5">
         {resume.sections.map((section) => {
           const blocks = layoutSection(section);
           return (
-            <section key={section.title} className="resume-section space-y-2">
+            <section key={section.title} className="resume-section space-y-1.5">
               <div className="relative border-b border-slate-200 pb-1 flex items-center justify-between">
-                <h3 className="font-resume text-[12px] font-bold uppercase tracking-wider text-violet-700 flex items-center gap-2">
+                <h3 className="font-resume text-[11.5px] font-bold uppercase tracking-wider text-violet-700 flex items-center gap-2">
                   <span className="inline-block w-1.5 h-3 bg-violet-600 rounded-xs" aria-hidden="true" />
                   {section.title}
                 </h3>
               </div>
-              <div className="space-y-2.5 pt-0.5">
+              <div className="space-y-2 pt-0.5">
                 {blocks.map((block, idx) => (
                   <SectionBlock key={idx} block={block} />
                 ))}
