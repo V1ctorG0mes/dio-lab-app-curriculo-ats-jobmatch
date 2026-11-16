@@ -186,7 +186,8 @@ Para as próximas iterações do produto (assim que os créditos forem renovados
 - [ ] **Visão Raio-X do Robô ATS:** Aba demonstrando a extração bruta e tags semânticas lidas pelo parser algorítmico.
 - [ ] **Analisador de Verbos de Ação & Métricas:** Métricas em tempo real avaliando a densidade de verbos de liderança/impacto e indicadores numéricos nos tópicos de experiência.
 - [ ] **Seletor de Área / Nicho:** Filtro por especialidade (Tech, Dados, Produto, Finanças, Primeiro Emprego) com dicionários léxicos customizados.
-- [ ] **Redesign Executivo da Folha A4:** Aprimoramento visual e tipográfico para equilibrar a aceitação de recrutadores humanos e robôs.
+- [x] **Redesign Executivo da Folha A4:** Aprimamento visual, hierarquia tipográfica, agrupamento inteligente de PDFs e configurações de impressão A4 (`15mm`) mantendo 100% de compatibilidade com robôs ATS.
+- [ ] **Radar de Vagas Compatíveis (Matchmaking):** Painel que cruza o currículo enviado com um catálogo de vagas em aberto, ranqueando as mais aderentes por Match Score (%) com botão de 1 clique para gerar o CV otimizado para aquela vaga.
 
 ---
 
