@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { LayoutDashboard, Lightbulb, Moon, ShieldCheck, Sparkles, Sun } from "lucide-react";
+import { LayoutDashboard, Lightbulb, Moon, Radar, ShieldCheck, Sparkles, Sun } from "lucide-react";
 import { Logo } from "./Logo";
 import { AtsTipsDialog } from "./AtsTipsDialog";
 import { toggleTheme, useTheme } from "@/lib/theme";
@@ -36,6 +36,12 @@ export function SiteHeader() {
           >
             <Sparkles className="size-4" />
             <span>Otimizador ATS</span>
+          </Link>
+          <Link to="/radar" className={navItem} activeProps={{ className: navActive }}>
+            <Radar className="size-4" />
+            <span>
+              Radar<span className="hidden sm:inline"> de Vagas</span>
+            </span>
           </Link>
           <Link to="/dashboard" className={navItem} activeProps={{ className: navActive }}>
             <LayoutDashboard className="size-4" />

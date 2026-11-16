@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import {
@@ -17,6 +17,7 @@ import {
   GraduationCap,
   Info,
   Printer,
+  Radar,
   Rocket,
   ScanSearch,
   Target,
@@ -48,8 +49,9 @@ import { analyze, countWords, type AnalysisResult } from "@/lib/ats";
 import { addHistoryEntry } from "@/lib/history";
 import { readResumeFile } from "@/lib/resume-file";
 import { downloadResumeDocx } from "@/lib/resume-docx";
-import { ResumeUpload, type UploadedFileInfo } from "@/components/app/ResumeUpload";
+import { ResumeUpload } from "@/components/app/ResumeUpload";
 import { NICHES, getSampleForNiche, type NicheId } from "@/lib/samples";
+import { draft, updateDraft } from "@/lib/draft";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
@@ -73,21 +75,6 @@ export const Route = createFileRoute("/")({
   component: OptimizerPage,
 });
 
-// Keeps the inputs while navigating between pages (client-only, in memory).
-const draft: {
-  niche: NicheId;
-  job: string;
-  resume: string;
-  result: AnalysisResult | null;
-  file: (UploadedFileInfo & { text: string }) | null;
-} = {
-  niche: "tech",
-  job: "",
-  resume: "",
-  result: null,
-  file: null,
-};
-
 const NICHE_ICONS: Record<NicheId, ReactNode> = {
   tech: <Code2 className="size-3.5" />,
   dados: <BarChart3 className="size-3.5" />,
@@ -106,7 +93,7 @@ function OptimizerPage() {
   const [reading, setReading] = useState(false);
   const [downloadingDocx, setDownloadingDocx] = useState(false);
 
-  const update = (next: Partial<typeof draft>) => Object.assign(draft, next);
+  const update = updateDraft;
 
   const selectNiche = (nextNiche: NicheId) => {
     setNiche(nextNiche);
@@ -225,7 +212,14 @@ function OptimizerPage() {
               limpa para ATS.
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            {countWords(resume) >= 15 && (
+              <Button variant="subtle" asChild>
+                <Link to="/radar">
+                  <Radar /> Ver vagas no Radar
+                </Link>
+              </Button>
+            )}
             <Button variant="soft" onClick={loadExample}>
               <FlaskConical /> Carregar Exemplo de Teste
             </Button>
