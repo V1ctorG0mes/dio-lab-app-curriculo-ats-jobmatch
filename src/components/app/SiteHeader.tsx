@@ -1,13 +1,17 @@
 import { Link } from "@tanstack/react-router";
-import { LayoutDashboard, Lightbulb, ShieldCheck, Sparkles } from "lucide-react";
+import { LayoutDashboard, Lightbulb, Moon, ShieldCheck, Sparkles, Sun } from "lucide-react";
 import { Logo } from "./Logo";
 import { AtsTipsDialog } from "./AtsTipsDialog";
+import { toggleTheme, useTheme } from "@/lib/theme";
 
 const navItem =
   "inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary-soft hover:text-primary-strong";
 const navActive = "bg-primary-soft text-primary-strong ring-1 ring-primary-border";
 
 export function SiteHeader() {
+  const theme = useTheme();
+  const isDark = theme === "dark";
+
   return (
     <header className="sticky top-0 z-40 border-b border-primary-border/70 bg-surface/90 backdrop-blur">
       <div className="bg-primary-soft text-primary-strong">
@@ -45,6 +49,15 @@ export function SiteHeader() {
               <span>Dicas ATS</span>
             </button>
           </AtsTipsDialog>
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={isDark ? "Ativar modo claro" : "Ativar modo escuro"}
+            title={isDark ? "Modo claro" : "Modo escuro"}
+            className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl border border-primary-border/70 bg-primary-soft/60 text-primary-strong transition-colors hover:bg-primary-soft"
+          >
+            {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
+          </button>
         </div>
       </nav>
     </header>
