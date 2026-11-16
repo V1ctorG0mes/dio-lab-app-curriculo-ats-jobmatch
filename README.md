@@ -10,7 +10,7 @@
   <img src="https://img.shields.io/badge/Status-Online-success?style=for-the-badge" alt="Status" />
 </p>
 
-> Projeto desenvolvido para o desafio prático do **Bootcamp Santander: Construa seu Primeiro App com I.A.** na plataforma **DIO (Digital Innovation One)**, aplicando Inteligência Artificial como parceira de desenvolvimento desde a engenharia de prompts até a publicação do produto no ar.
+> Projeto desenvolvido para o desafio prático do **Bootcamp Santander: Construa seu Primeiro App com I.A.** na plataforma **DIO (Digital Innovation One)**, aplicando Inteligência Artificial como parceira de desenvolvimento desde a concepção do MVP, engenharia de prompts, até a evolução com upload de arquivos e publicação no ar.
 
 ---
 
@@ -24,8 +24,8 @@
 ## 📸 Telas da Aplicação
 
 <div align="center">
-  <h3>1. Otimizador ATS & Diagnóstico de Match</h3>
-  <img src="docs/screenshots/01-otimizador-ats.jpg" alt="Otimizador ATS" width="90%" />
+  <h3>1. Otimizador ATS com Upload de Arquivo (Drag & Drop) & Diagnóstico de Match</h3>
+  <img src="docs/screenshots/01-otimizador-ats.jpg" alt="Otimizador ATS com Upload" width="90%" />
 
   <br/><br/>
   <h3>2. Dashboard de Métricas & Histórico com Gráficos Recharts</h3>
@@ -49,7 +49,7 @@ Os principais motivos de rejeição algorítmica são:
 3. **Falta de Clareza em Resultados:** Experiências descritas de forma genérica sem verbos de ação e métricas tangíveis de impacto.
 
 ### A Oportunidade
-Construir uma ferramenta web **ágil, 100% gratuita, sem necessidade de cadastro ou atrito**, que analisa a aderência entre a vaga e o currículo, diagnostica termos ausentes e formata uma versão limpa e legível para qualquer robô de RH.
+Construir uma ferramenta web **ágil, 100% gratuita, sem necessidade de cadastro ou atrito**, que analisa a aderência entre a vaga e o currículo, diagnostica termos ausentes e formata uma versão limpa e legível para qualquer robô de RH, agora com suporte a **upload direto de arquivos** para eliminar a fricção de copiar e colar.
 
 ---
 
@@ -74,13 +74,13 @@ Seguindo a diretriz pedagógica do Expert Bruno na DIO, a ferramenta:
 ### Business Model Canvas (Resumo Executivo)
 | Bloco do Canvas | Descrição no Negócio |
 | :--- | :--- |
-| **Proposta de Valor** | Matchmaking instantâneo de currículos com vagas e geração de versão 100% legível por ATS em menos de 1 minuto, com garantia ética de veracidade. |
+| **Proposta de Valor** | Matchmaking instantâneo de currículos com vagas, leitura automática de arquivos (.pdf/.docx/.txt) e geração de versão 100% legível por ATS em menos de 1 minuto, com garantia ética de veracidade. |
 | **Segmento de Clientes** | Desenvolvedores, analistas de dados, gerentes de produto e profissionais em transição de carreira. |
 | **Canais** | Aplicação Web responsiva (SPA), compartilhamento orgânico em comunidades tech (LinkedIn, GitHub, Discord). |
 | **Relacionamento** | Experiência self-service instantânea, sem fricção de login obrigatório, com salvamento transparente no navegador (`localStorage`). |
 | **Fontes de Receita (Roadmap)** | Versão Core 100% gratuita; expansão futura para planos Pro com integração a portais de vagas e simulação de entrevistas com IA. |
-| **Recursos Chave** | Algoritmo Léxico ATS client-side, componentes acessíveis shadcn/ui, dashboard analítico com Recharts. |
-| **Atividades Chave** | Curadoria contínua do dicionário de palavras-chave técnicas, refinamento de templates ATS e testes de compatibilidade. |
+| **Recursos Chave** | Algoritmo Léxico ATS client-side, leitor de arquivos no navegador, componentes acessíveis shadcn/ui, dashboard analítico com Recharts. |
+| **Atividades Chave** | Curadoria contínua do dicionário de palavras-chave técnicas, refinamento de parsers de arquivo e testes de compatibilidade. |
 | **Parcerias Chave** | Lovable (desenvolvimento ágil assistido por IA) e DIO (ecossistema de educação tech). |
 | **Estrutura de Custos** | Custo operacional zero no MVP (deploy estático em Cloudflare/Lovable e processamento local no cliente). |
 
@@ -89,7 +89,7 @@ Seguindo a diretriz pedagógica do Expert Bruno na DIO, a ferramenta:
 ## 🖥️ 4. O Fluxo da Aplicação
 
 ```
-  [Colar Vaga]       +    [Colar Currículo]
+  [Colar Vaga]   +   [Upload .pdf/.docx/.txt ou Colar CV]
        │                         │
        └───────────┬─────────────┘
                    ▼
@@ -112,12 +112,14 @@ Seguindo a diretriz pedagógica do Expert Bruno na DIO, a ferramenta:
      [Copiar]  │  [Salvar PDF]  │  [Dashboard de Histórico]
 ```
 
-1. **Entrada de Dados Ágil:** Cards para colar a descrição da vaga e o currículo atual, com botão de **"Carregar Exemplo de Teste"** para experimentação com 1 clique (presets de Frontend, Dados e Product Management).
+1. **Upload de Arquivo & Entrada de Dados:** 
+   - Zona de **Drag & Drop** com suporte a arquivos `.pdf`, `.docx`, `.txt` e `.md` (até 10 MB) processados **100% no navegador (client-side)**, garantindo total privacidade do candidato.
+   - Opção tradicional de colar texto livremente ou utilizar o botão **"Carregar Exemplo de Teste"** para experimentação com 1 clique (presets de Frontend, Dados e Product Management).
 2. **Motor Léxico ATS:** O algoritmo extrai termos técnicos, hard skills, metodologias e certificações, comparando-os com o currículo por meio de expressões regulares seguras e normalização de caracteres (sem acentos e minúsculas).
 3. **Diagnóstico Visual:** Círculo de progresso animado com o Match Score, badges em verde lima para termos validados e badges roxos para palavras ausentes.
 4. **Currículo ATS Formatado:**
    - **Modo Folha A4:** Tipografia limpa, hierarquia linear (sem colunas), cabeçalho executivo e tópicos objetivos.
-   - **Modo Texto Puro:** Formatado para copiar e colar diretamente em caixas de texto de portais de recrutamento.
+   - **Modo Texto Puro:** Formatado para copiar e colar diretamente em caixas de texto de portais de recrutamento (ex: Gupy/Workday).
 5. **Exportação Sem Dependências Pesadas:** Botão de cópia rápida com Toast de confirmação e botão de impressão estilizado via regras CSS `@media print` para salvar em PDF perfeito.
 6. **Dashboard com Gráficos & Histórico:** Página dedicada (`/dashboard`) com KPIs de evolução, tabela de histórico de candidaturas salvas no `localStorage` e gráfico de barras comparando **Nota Inicial vs. Nota Otimizada**.
 7. **Modal "5 Mandamentos ATS":** Dicas práticas e didáticas para candidatos nunca caírem em armadilhas de formatação.
@@ -126,8 +128,7 @@ Seguindo a diretriz pedagógica do Expert Bruno na DIO, a ferramenta:
 
 ## 🤖 5. Engenharia de Prompts (Lovable)
 
-O projeto foi gerado com sucesso utilizando o **Mega Prompt Único** estruturado em Markdown, garantindo arquitetura robusta, design system shadcn/ui e paleta de cores consistente:
-
+### 1º Prompt: Concepção do MVP (Mega Prompt Único)
 ```markdown
 Crie uma aplicação web SPA completa, moderna e responsiva chamada JobMatch ATS, 
 utilizando React, React Router, Tailwind CSS e componentes do shadcn/ui.
@@ -156,6 +157,37 @@ amigáveis para robôs ATS (Application Tracking Systems) e acompanhar métricas
 - Tabela de histórico persistida em localStorage.
 ```
 
+### 2º Prompt: Evolução do Produto (Upload de Arquivos com Drag & Drop)
+```markdown
+Mantenha todas as funcionalidades e estilo atuais da aplicação e adicione suporte a upload de arquivos no card "Seu currículo atual" na página principal (`src/routes/index.tsx`):
+
+1. Interface de Upload (shadcn/ui):
+- Acima da área de texto do currículo, crie uma zona de upload interativa com suporte a Drag & Drop (arrastar e soltar) e botão "Selecionar Arquivo".
+- Aceite os formatos: `.txt`, `.md`, `.docx` e `.pdf` (até 10 MB).
+- Estilo: Borda tracejada suave (`border-dashed border-violet-200`), ícone de upload da Lucide, e efeito visual em verde lima ao arrastar um arquivo por cima.
+
+2. Lógica de Leitura 100% Client-Side:
+- Para arquivos `.txt` e `.md`: Leia diretamente usando a API nativa `FileReader`.
+- Para arquivos `.docx`: Utilize uma biblioteca leve de leitura client-side (como `mammoth`) para extrair o texto puro.
+- Para arquivos `.pdf`: Utilize `pdfjs-dist` (ou leitor nativo de texto de PDF no navegador) para extrair o texto das páginas.
+- Assim que o arquivo for lido, preencha automaticamente a Textarea do currículo com o texto extraído, atualize o contador de palavras e exiba um Toast de sucesso.
+
+3. Controle do Arquivo Carregado:
+- Se houver um arquivo carregado, mostre uma badge/tag com o nome do arquivo, tamanho e um botão com ícone 'X' para remover ou substituir o arquivo facilmente.
+```
+
+---
+
+## 🗺️ 6. Roadmap de Evolução Futura
+
+Para as próximas iterações do produto (assim que os créditos forem renovados):
+- [x] **Upload de Arquivo:** Suporte a arquivos `.pdf`, `.docx`, `.txt` e `.md` via Drag & Drop.
+- [ ] **Exportação em .DOCX (Word):** Download direto do currículo editável no formato Word sem quebrar a hierarquia ATS.
+- [ ] **Visão Raio-X do Robô ATS:** Aba demonstrando a extração bruta e tags semânticas lidas pelo parser algorítmico.
+- [ ] **Analisador de Verbos de Ação & Métricas:** Métricas em tempo real avaliando a densidade de verbos de liderança/impacto e indicadores numéricos nos tópicos de experiência.
+- [ ] **Seletor de Área / Nicho:** Filtro por especialidade (Tech, Dados, Produto, Finanças, Primeiro Emprego) com dicionários léxicos customizados.
+- [ ] **Redesign Executivo da Folha A4:** Aprimoramento visual e tipográfico para equilibrar a aceitação de recrutadores humanos e robôs.
+
 ---
 
 ## 🛠️ Tecnologias Utilizadas
@@ -177,31 +209,7 @@ amigáveis para robôs ATS (Application Tracking Systems) e acompanhar métricas
 Antes da publicação, o código-fonte foi auditado e aprovado com base nas diretrizes do Bootcamp:
 - ✅ **Zero Chaves de API Expostas:** O aplicativo não utiliza chaves de terceiros ou segredos no cliente.
 - ✅ **Zero Dados Pessoais Sensíveis:** Todos os exemplos de teste utilizam nomes e contatos fictícios (*Marina Costa*, *Rafael Lima*, etc.).
-- ✅ **Zero Custos Ocultos:** Toda a análise, histórico e cálculos operam 100% no navegador do usuário via JavaScript nativo e `localStorage`.
-
----
-
-## 🧪 Suíte de Testes Unitários
-
-O projeto possui cobertura de testes automatizados com **Vitest** validando o cálculo de score, extração de palavras-chave e garantia ética:
-
-```bash
-# Executar todos os testes
-npm test
-```
-
-```text
- ✓ src/lib/ats.test.ts (7 tests)
-   ✓ normalizes and extracts keywords from job description
-   ✓ calculates match score correctly
-   ✓ identifies missing keywords required by the vacancy
-   ✓ maintains ethical integrity without hallucinating experiences
- ✓ src/test/app-routing.test.tsx (1 test)
-   ✓ renders routes and navigation correctly
-
- Test Files  2 passed (2)
-      Tests  8 passed (8)
-```
+- ✅ **Zero Custos Ocultos:** Toda a análise, histórico, leitura de arquivos e cálculos operam 100% no navegador do usuário via JavaScript nativo e `localStorage`.
 
 ---
 
