@@ -1,3 +1,133 @@
+export type NicheId = "tech" | "dados" | "produto" | "negocios" | "estagio";
+
+export type NicheOption = {
+  id: NicheId;
+  label: string;
+  shortLabel: string;
+  description: string;
+};
+
+export const NICHES: NicheOption[] = [
+  {
+    id: "tech",
+    label: "Tecnologia & Software",
+    shortLabel: "Tecnologia",
+    description: "Foco em linguagens, frameworks, APIs, cloud e testes.",
+  },
+  {
+    id: "dados",
+    label: "Dados, BI & IA",
+    shortLabel: "Dados & BI",
+    description: "Foco em SQL, Python, BI, ETL, estatística e ML.",
+  },
+  {
+    id: "produto",
+    label: "Produto & Growth",
+    shortLabel: "Produto",
+    description: "Foco em roadmap, discovery, métricas, OKRs e agile.",
+  },
+  {
+    id: "negocios",
+    label: "Finanças & Negócios",
+    shortLabel: "Negócios",
+    description: "Foco em ERP, Excel, DRE, processos, CRM e KPIs.",
+  },
+  {
+    id: "estagio",
+    label: "Primeiro Emprego / Estágio",
+    shortLabel: "Estágio",
+    description: "Destaca formação e projetos práticos antes da experiência.",
+  },
+];
+
+export const SAMPLE_JOB_BUSINESS = `Vaga: Analista Financeiro & Operações Pleno
+Empresa: Grupo Horizonte
+
+Responsabilidades
+- Conduzir o fechamento mensal, análise de DRE e fluxo de caixa
+- Realizar conciliação bancária e controle orçamentário
+- Otimizar processos operacionais no sistema ERP (SAP) e planilhas Excel avançado
+- Construir relatórios gerenciais e dashboards de KPIs em Power BI para diretoria
+- Negociar com fornecedores e alinhar stakeholders internos
+
+Requisitos
+- Experiência com ERP, Excel avançado, DRE e Fluxo de Caixa
+- Conhecimento em Power BI e melhoria de processos
+- Comunicação clara e trabalho em equipe`;
+
+export const SAMPLE_RESUME_BUSINESS = `Camila Ferreira
+Curitiba, PR | camila.ferreira@email.com | (41) 99123-4567
+
+Resumo Profissional
+Analista financeira com 4 anos de experiência em controladoria, fluxo de caixa e otimização de processos administrativos.
+
+Experiência Profissional
+Analista Financeira — Distribuidora Sul (2022 - atual)
+- Estruturei o controle de fluxo de caixa e análise mensal de DRE, reduzindo divergências em 25%
+- Automatizei rotinas de conciliação no Excel com macros e consultas em ERP SAP, economizando 8h semanais
+- Elaborei relatórios de KPIs financeiros para diretoria e stakeholders comerciais
+
+Assistente Administrativo — Comercial Paraná (2020 - 2022)
+- Apoiei o controle de contas a pagar e receber utilizando sistema ERP e pacote Microsoft 365
+
+Formação Acadêmica
+Bacharelado em Administração — UFPR (2020)
+
+Competências
+Excel, ERP, SAP, DRE, Fluxo de Caixa, Power BI, Comunicação, Trabalho em equipe`;
+
+export const SAMPLE_JOB_INTERN = `Vaga: Estágio em Desenvolvimento de Software
+Empresa: EducaTech Brasil
+
+Sobre a vaga
+Buscamos estudante de Tecnologia com vontade de aprender desenvolvimento web e banco de dados em ambiente ágil.
+
+Atividades
+- Apoiar a criação de interfaces responsivas com HTML, CSS, JavaScript e React
+- Escrever consultas básicas em SQL e colaborar com APIs REST
+- Versionar código com Git e GitHub junto ao time em Scrum
+
+Requisitos
+- Cursando Análise e Desenvolvimento de Sistemas, Ciência da Computação ou áreas afins
+- Conhecimento em Lógica de Programação, POO (Java ou Python) e Git
+- Boa comunicação e trabalho em equipe`;
+
+export const SAMPLE_RESUME_INTERN = `Lucas Almeida
+Campinas, SP | lucas.almeida@email.com | github.com/lucasalmeida-dev
+
+Resumo Profissional
+Estudante de Análise e Desenvolvimento de Sistemas focado em desenvolvimento web e boas práticas de programação.
+
+Formação Acadêmica
+Tecnologia em Análise e Desenvolvimento de Sistemas — FATEC Campinas (2025 - 2027)
+
+Projetos
+Sistema Acadêmico de Biblioteca (2025)
+- Desenvolvi interfaces responsivas com HTML, CSS e JavaScript integradas a banco de dados SQL
+- Modelei regras de negócio aplicando POO em Java e versionamento no GitHub
+
+Monitoria Voluntária de Algoritmos (2024)
+- Auxiliei 30 alunos em exercícios de lógica de programação e resolução de problemas em Python
+
+Competências Técnicas
+HTML, CSS, JavaScript, Java, Python, SQL, Git, GitHub, Lógica de Programação, Trabalho em equipe`;
+
+export function getSampleForNiche(niche: NicheId): { job: string; resume: string } {
+  switch (niche) {
+    case "dados":
+      return { job: SAMPLE_JOB_DATA, resume: SAMPLE_RESUME_DATA };
+    case "produto":
+      return { job: SAMPLE_JOB_PM, resume: SAMPLE_RESUME_PM };
+    case "negocios":
+      return { job: SAMPLE_JOB_BUSINESS, resume: SAMPLE_RESUME_BUSINESS };
+    case "estagio":
+      return { job: SAMPLE_JOB_INTERN, resume: SAMPLE_RESUME_INTERN };
+    case "tech":
+    default:
+      return { job: SAMPLE_JOB_FRONTEND, resume: SAMPLE_RESUME_FRONTEND };
+  }
+}
+
 export const SAMPLE_JOB_FRONTEND = `Vaga: Desenvolvedor(a) Frontend React Pleno
 Empresa: Nuvem Pay
 

@@ -180,12 +180,12 @@ Mantenha todas as funcionalidades e estilo atuais da aplicação e adicione supo
 
 ## 🗺️ 6. Roadmap de Evolução Futura
 
-Para as próximas iterações do produto (assim que os créditos forem renovados):
+Para as próximas iterações do produto:
 - [x] **Upload de Arquivo:** Suporte a arquivos `.pdf`, `.docx`, `.txt` e `.md` via Drag & Drop.
-- [ ] **Exportação em .DOCX (Word):** Download direto do currículo editável no formato Word sem quebrar a hierarquia ATS.
-- [ ] **Visão Raio-X do Robô ATS:** Aba demonstrando a extração bruta e tags semânticas lidas pelo parser algorítmico.
-- [ ] **Analisador de Verbos de Ação & Métricas:** Métricas em tempo real avaliando a densidade de verbos de liderança/impacto e indicadores numéricos nos tópicos de experiência.
-- [ ] **Seletor de Área / Nicho:** Filtro por especialidade (Tech, Dados, Produto, Finanças, Primeiro Emprego) com dicionários léxicos customizados.
+- [x] **Exportação em .DOCX (Word):** Download direto do currículo editável no formato Word mantendo a hierarquia de coluna única ATS.
+- [x] **Visão Raio-X do Robô ATS:** Aba demonstrando a extração bruta e tags semânticas lidas pelo parser algorítmico com destaque de keywords.
+- [x] **Analisador de Verbos de Ação & Métricas:** Métricas em tempo real avaliando a densidade de verbos fortes e indicadores numéricos (`%`, `R$`, números) nos tópicos de experiência.
+- [x] **Seletor de Área / Nicho:** Filtro por especialidade (Tech, Dados, Produto, Negócios, Primeiro Emprego) adaptando o dicionário léxico, exemplos e ordenação de seções.
 - [x] **Redesign Executivo da Folha A4:** Aprimamento visual, hierarquia tipográfica, agrupamento inteligente de PDFs e configurações de impressão A4 (`15mm`) mantendo 100% de compatibilidade com robôs ATS.
 - [ ] **Radar de Vagas Compatíveis (Matchmaking):** Painel que cruza o currículo enviado com um catálogo de vagas em aberto, ranqueando as mais aderentes por Match Score (%) com botão de 1 clique para gerar o CV otimizado para aquela vaga.
 

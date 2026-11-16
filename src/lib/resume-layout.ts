@@ -35,8 +35,10 @@ export function parseEntryHeader(line: string): { title: string; org: string | n
   let rest = trimmed;
   let period: string | null = null;
   const m = rest.match(PERIOD_RE);
-  if (m && m.index && m.index > 0) {
-    period = m[1].replace(/\s*[-–—]\s*/, " – ").replace(/\b(atual|presente|hoje|o momento)\b/i, (w) => w[0].toUpperCase() + w.slice(1));
+  if (m && m[1] && m.index && m.index > 0) {
+    period = m[1]
+      .replace(/\s*[-–—]\s*/, " – ")
+      .replace(/\b(atual|presente|hoje|o momento)\b/i, (w) => (w[0]?.toUpperCase() ?? "") + w.slice(1));
     rest = rest.slice(0, m.index).replace(/[\s,|–—-]+$/, "").trim();
   }
 
@@ -64,7 +66,7 @@ export function highlightBullet(text: string): TextRun[] {
   const runs: TextRun[] = [];
   let rest = text;
   const verb = rest.match(ACTION_VERB_RE);
-  if (verb) {
+  if (verb?.[1]) {
     runs.push({ text: verb[1], strong: true });
     rest = rest.slice(verb[1].length);
   }

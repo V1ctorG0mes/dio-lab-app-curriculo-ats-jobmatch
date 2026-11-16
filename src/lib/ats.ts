@@ -3,11 +3,21 @@
  * reformatting. It only reorganizes and normalizes what the candidate already
  * wrote — it never adds experience or skills that are not in the resume.
  */
+import type { NicheId } from "./samples";
 
 export type ResumeSection = { title: string; lines: string[] };
 export type OptimizedResume = { name: string; contact: string[]; sections: ResumeSection[] };
 
+export type QualityMetrics = {
+  totalBullets: number;
+  actionVerbBullets: number;
+  actionVerbRate: number;
+  impactMetricsCount: number;
+  detectedMetrics: string[];
+};
+
 export type AnalysisResult = {
+  niche: NicheId;
   jobTitle: string;
   company: string;
   keywords: string[];
@@ -15,85 +25,104 @@ export type AnalysisResult = {
   missing: string[];
   initialScore: number;
   score: number;
+  quality: QualityMetrics;
   resume: OptimizedResume;
   plainText: string;
 };
 
-type LexiconEntry = { term: string; aliases?: string[] };
+type LexiconEntry = { term: string; aliases?: string[]; niches?: NicheId[] };
 
 const LEXICON: LexiconEntry[] = [
-  // Frontend / engineering
-  { term: "React Native" },
-  { term: "React", aliases: ["reactjs", "react.js"] },
-  { term: "TypeScript", aliases: ["ts"] },
-  { term: "JavaScript", aliases: ["js", "es6", "ecmascript"] },
-  { term: "Next.js", aliases: ["nextjs"] },
-  { term: "Node.js", aliases: ["nodejs", "node"] },
-  { term: "HTML", aliases: ["html5"] },
-  { term: "CSS", aliases: ["css3"] },
-  { term: "Tailwind CSS", aliases: ["tailwind", "tailwindcss"] },
-  { term: "Redux", aliases: ["redux toolkit"] },
-  { term: "Zustand" },
-  { term: "Vue.js", aliases: ["vue", "vuejs"] },
-  { term: "Angular" },
-  { term: "Jest" },
-  { term: "Testing Library", aliases: ["react testing library"] },
-  { term: "Cypress" },
-  { term: "Playwright" },
+  // Frontend / engineering / tech
+  { term: "React Native", niches: ["tech"] },
+  { term: "React", aliases: ["reactjs", "react.js"], niches: ["tech", "estagio"] },
+  { term: "TypeScript", aliases: ["ts"], niches: ["tech"] },
+  { term: "JavaScript", aliases: ["js", "es6", "ecmascript"], niches: ["tech", "estagio"] },
+  { term: "Next.js", aliases: ["nextjs"], niches: ["tech"] },
+  { term: "Node.js", aliases: ["nodejs", "node"], niches: ["tech"] },
+  { term: "HTML", aliases: ["html5"], niches: ["tech", "estagio"] },
+  { term: "CSS", aliases: ["css3"], niches: ["tech", "estagio"] },
+  { term: "Tailwind CSS", aliases: ["tailwind", "tailwindcss"], niches: ["tech", "estagio"] },
+  { term: "Redux", aliases: ["redux toolkit"], niches: ["tech"] },
+  { term: "Zustand", niches: ["tech"] },
+  { term: "Vue.js", aliases: ["vue", "vuejs"], niches: ["tech"] },
+  { term: "Angular", niches: ["tech"] },
+  { term: "Jest", niches: ["tech"] },
+  { term: "Testing Library", aliases: ["react testing library"], niches: ["tech"] },
+  { term: "Cypress", niches: ["tech"] },
+  { term: "Playwright", niches: ["tech"] },
   {
     term: "Testes automatizados",
     aliases: ["testes unitarios", "testes de integracao", "unit tests", "testes e2e"],
+    niches: ["tech"],
   },
-  { term: "Git", aliases: ["github", "gitlab"] },
-  { term: "CI/CD", aliases: ["github actions", "pipelines de deploy"] },
-  { term: "APIs REST", aliases: ["rest", "restful", "api rest", "apis restful"] },
-  { term: "GraphQL" },
-  { term: "Acessibilidade", aliases: ["a11y", "wcag", "accessibility"] },
-  { term: "Performance web", aliases: ["web vitals", "core web vitals", "lighthouse"] },
-  { term: "Design System", aliases: ["design systems", "storybook"] },
-  { term: "Figma" },
-  { term: "SEO" },
-  { term: "Vite" },
-  { term: "Webpack" },
-  { term: "Docker" },
-  { term: "Kubernetes", aliases: ["k8s"] },
-  { term: "AWS", aliases: ["amazon web services"] },
-  { term: "Azure" },
-  { term: "GCP", aliases: ["google cloud"] },
-  { term: "Microsserviços", aliases: ["microservices", "microsservicos"] },
-  { term: "Java" },
-  { term: "Spring Boot", aliases: ["spring"] },
+  { term: "Git", aliases: ["github", "gitlab"], niches: ["tech", "dados", "estagio"] },
+  { term: "GitHub", niches: ["tech", "estagio"] },
+  { term: "CI/CD", aliases: ["github actions", "pipelines de deploy"], niches: ["tech"] },
+  { term: "APIs REST", aliases: ["rest", "restful", "api rest", "apis restful"], niches: ["tech", "estagio"] },
+  { term: "GraphQL", niches: ["tech"] },
+  { term: "Acessibilidade", aliases: ["a11y", "wcag", "accessibility"], niches: ["tech", "produto"] },
+  { term: "Performance web", aliases: ["web vitals", "core web vitals", "lighthouse"], niches: ["tech"] },
+  { term: "Design System", aliases: ["design systems", "storybook"], niches: ["tech", "produto"] },
+  { term: "Figma", niches: ["tech", "produto"] },
+  { term: "SEO", niches: ["tech", "produto"] },
+  { term: "Vite", niches: ["tech"] },
+  { term: "Webpack", niches: ["tech"] },
+  { term: "Docker", niches: ["tech", "dados"] },
+  { term: "Kubernetes", aliases: ["k8s"], niches: ["tech"] },
+  { term: "AWS", aliases: ["amazon web services"], niches: ["tech", "dados"] },
+  { term: "Azure", niches: ["tech", "dados"] },
+  { term: "GCP", aliases: ["google cloud"], niches: ["tech", "dados"] },
+  { term: "Microsserviços", aliases: ["microservices", "microsservicos"], niches: ["tech"] },
+  { term: "Java", niches: ["tech", "estagio"] },
+  { term: "Spring Boot", aliases: ["spring"], niches: ["tech"] },
+  { term: "Kotlin", niches: ["tech", "estagio"] },
+  { term: "POO", aliases: ["programacao orientada a objetos"], niches: ["tech", "estagio"] },
+  { term: "Lógica de Programação", aliases: ["algoritmos", "pensamento computacional"], niches: ["estagio", "tech"] },
+  { term: "Suporte Técnico", aliases: ["hardware", "redes", "infraestrutura"], niches: ["estagio", "negocios"] },
   // Data
-  { term: "Python" },
-  { term: "SQL", aliases: ["postgresql", "mysql", "sql server", "bigquery"] },
-  { term: "Power BI", aliases: ["powerbi"] },
-  { term: "Tableau" },
-  { term: "Looker", aliases: ["looker studio"] },
-  { term: "Excel", aliases: ["planilhas"] },
-  { term: "Pandas" },
-  { term: "ETL", aliases: ["pipelines de dados"] },
-  { term: "Estatística", aliases: ["statistics"] },
-  { term: "Machine Learning", aliases: ["aprendizado de maquina", "ml"] },
-  { term: "Dashboards", aliases: ["dashboard", "paineis"] },
-  { term: "Modelagem de dados", aliases: ["data modeling", "modelagem dimensional"] },
+  { term: "Python", niches: ["dados", "tech", "estagio"] },
+  { term: "SQL", aliases: ["postgresql", "mysql", "sql server", "bigquery", "oracle", "oracle db"], niches: ["dados", "tech", "estagio"] },
+  { term: "Power BI", aliases: ["powerbi"], niches: ["dados", "negocios"] },
+  { term: "Tableau", niches: ["dados"] },
+  { term: "Looker", aliases: ["looker studio"], niches: ["dados", "produto"] },
+  { term: "Excel", aliases: ["planilhas", "excel avancado"], niches: ["dados", "negocios"] },
+  { term: "Pandas", niches: ["dados"] },
+  { term: "ETL", aliases: ["pipelines de dados"], niches: ["dados"] },
+  { term: "Estatística", aliases: ["statistics"], niches: ["dados"] },
+  { term: "Machine Learning", aliases: ["aprendizado de maquina", "ml"], niches: ["dados"] },
+  { term: "Dashboards", aliases: ["dashboard", "paineis"], niches: ["dados", "negocios", "produto"] },
+  { term: "Modelagem de dados", aliases: ["data modeling", "modelagem dimensional"], niches: ["dados"] },
   // Product / management
-  { term: "Scrum" },
-  { term: "Kanban" },
-  { term: "Metodologias ágeis", aliases: ["agile", "agil", "ageis"] },
-  { term: "Roadmap", aliases: ["roadmaps"] },
-  { term: "OKRs", aliases: ["okr"] },
-  { term: "Product Discovery", aliases: ["discovery"] },
-  { term: "Jira" },
-  { term: "KPIs", aliases: ["kpi", "metricas de produto", "metricas"] },
-  { term: "Stakeholders", aliases: ["stakeholder"] },
+  { term: "Scrum", niches: ["produto", "tech", "estagio"] },
+  { term: "Kanban", niches: ["produto", "tech", "negocios"] },
+  { term: "Metodologias ágeis", aliases: ["agile", "agil", "ageis"], niches: ["produto", "tech", "estagio"] },
+  { term: "Roadmap", aliases: ["roadmaps"], niches: ["produto"] },
+  { term: "OKRs", aliases: ["okr"], niches: ["produto", "negocios"] },
+  { term: "Product Discovery", aliases: ["discovery"], niches: ["produto"] },
+  { term: "Jira", niches: ["produto", "tech"] },
+  { term: "KPIs", aliases: ["kpi", "metricas de produto", "metricas"], niches: ["produto", "dados", "negocios"] },
+  { term: "Stakeholders", aliases: ["stakeholder"], niches: ["produto", "negocios", "dados"] },
   {
     term: "Pesquisa com usuários",
     aliases: ["user research", "ux research", "entrevistas com usuarios"],
+    niches: ["produto"],
   },
-  { term: "Priorização", aliases: ["backlog", "rice"] },
-  { term: "Testes A/B", aliases: ["teste a/b", "a/b testing", "ab testing"] },
-  { term: "SaaS" },
-  { term: "B2B" },
+  { term: "Priorização", aliases: ["backlog", "rice"], niches: ["produto"] },
+  { term: "Testes A/B", aliases: ["teste a/b", "a/b testing", "ab testing"], niches: ["produto", "dados"] },
+  { term: "SaaS", niches: ["produto", "tech"] },
+  { term: "B2B", niches: ["produto", "negocios"] },
+  // Business / Finance / Operations
+  { term: "ERP", aliases: ["sistemas erp"], niches: ["negocios"] },
+  { term: "SAP", niches: ["negocios"] },
+  { term: "DRE", aliases: ["demonstracao de resultado"], niches: ["negocios"] },
+  { term: "Fluxo de Caixa", aliases: ["contas a pagar", "contas a receber"], niches: ["negocios"] },
+  { term: "Conciliação bancária", aliases: ["conciliacao"], niches: ["negocios"] },
+  { term: "Controle orçamentário", aliases: ["orcamento", "controladoria"], niches: ["negocios"] },
+  { term: "Processos", aliases: ["otimizacao de processos", "melhoria de processos"], niches: ["negocios"] },
+  { term: "Microsoft 365", aliases: ["pacote office", "office"], niches: ["negocios", "estagio"] },
+  { term: "CRM", niches: ["negocios", "produto"] },
+  { term: "Negociação", aliases: ["fornecedores"], niches: ["negocios"] },
   // Soft skills & languages
   { term: "Inglês", aliases: ["english"] },
   { term: "Espanhol", aliases: ["spanish"] },
@@ -135,14 +164,19 @@ export function countWords(text: string): number {
   return t ? t.split(/\s+/).length : 0;
 }
 
-/** Keywords the job description asks for, in the vacancy's own spelling. */
-export function extractKeywords(jobDescription: string): string[] {
+/** Keywords the job description asks for, prioritizing terms relevant to the selected niche. */
+export function extractKeywords(jobDescription: string, niche: NicheId = "tech"): string[] {
   const jd = normalize(jobDescription);
-  const found: string[] = [];
+  const prioritized: string[] = [];
+  const general: string[] = [];
   for (const entry of LEXICON) {
     const variants = [entry.term, ...(entry.aliases ?? [])];
-    if (variants.some((v) => containsTerm(jd, v))) found.push(entry.term);
+    if (variants.some((v) => containsTerm(jd, v))) {
+      if (entry.niches?.includes(niche)) prioritized.push(entry.term);
+      else general.push(entry.term);
+    }
   }
+  const found = [...prioritized, ...general];
 
   // Fallback: frequent meaningful words when the lexicon finds little.
   if (found.length < 8) {
@@ -357,8 +391,86 @@ function extractField(jd: string, re: RegExp): string | null {
   return null;
 }
 
-export function analyze(jobDescription: string, resumeText: string): AnalysisResult {
-  const keywords = extractKeywords(jobDescription);
+const STRONG_ACTION_VERB_RE =
+  /^(?:\p{L}{3,}(?:ei|i|ou|amos|imos|ava|ia|ed)|desenvolvi|criei|implementei|liderei|otimizei|reduzi|aumentei|automatizei|estruturei|gerenciei|coordenei|conduzi|projetei|integrei|construi|configurei|analisei|defini|priorizei|acompanhei|colaborei|elaborei|auxiliei|modelei|trabalhei|apoiei|atuei|participei|entreguei|lancei|negociei|mapei|reestruturei|organizei|padronizei|solucionei|migrei|escalei|mentorei|treinei|developed|built|led|implemented|created|reduced|increased|optimized|designed|managed|automated|delivered|launched)(?=[\s,:])/iu;
+
+const IMPACT_METRIC_RE =
+  /(?:R\$\s?\d[\d.,]*(?:\s?(?:mil|mi|milh[õo]es|bi|k))?|\$\s?\d[\d.,]*(?:\s?(?:k|m|b))?|\+?\d[\d.,]*\s?(?:%|x\b|mil\b|milh[õo]es\b|k\b|pp\b|h\b|horas?\b|dias?\b|meses?\b|anos?\b|alunos?\b|usu[áa]rios?\b|clientes?\b|empresas?\b|consultas?\b|projetos?\b)|\b\d{1,3}\/\d{2,3}\b)/giu;
+
+const INTERN_SECTION_ORDER: SectionKey[] = [
+  "resumo",
+  "formacao",
+  "projetos",
+  "competencias",
+  "experiencia",
+  "certificacoes",
+  "idiomas",
+];
+
+export function analyzeWritingQuality(resume: OptimizedResume, rawResumeText: string): QualityMetrics {
+  const bulletLines: string[] = [];
+  for (const s of resume.sections) {
+    const key = normalize(s.title);
+    if (key.includes("competencia") || key.includes("idioma")) continue;
+    for (const line of s.lines) {
+      if (line.startsWith("- ")) bulletLines.push(line.slice(2).trim());
+    }
+  }
+
+  const totalBullets = bulletLines.length;
+  const actionVerbBullets = bulletLines.filter((b) => STRONG_ACTION_VERB_RE.test(b)).length;
+  const actionVerbRate = totalBullets > 0 ? Math.round((actionVerbBullets / totalBullets) * 100) : 0;
+
+  const detectedSet = new Set<string>();
+  const cleanedRaw = rawResumeText.replace(/\(\d{2}\)\s?\d{4,5}-?\d{4}/g, "");
+  for (const match of cleanedRaw.matchAll(IMPACT_METRIC_RE)) {
+    const val = match[0].trim();
+    // Skip pure calendar years if matched unexpectedly
+    if (/^(19|20)\d{2}$/.test(val)) continue;
+    detectedSet.add(val);
+  }
+  const detectedMetrics = [...detectedSet];
+
+  return {
+    totalBullets,
+    actionVerbBullets,
+    actionVerbRate,
+    impactMetricsCount: detectedMetrics.length,
+    detectedMetrics,
+  };
+}
+
+export function buildXRayText(result: AnalysisResult): string {
+  const lines: string[] = [
+    `[ATS_PARSER_ENGINE v1.0 | NICHO: ${result.niche.toUpperCase()}]`,
+    `[MATCH_SCORE: ${result.score}% | KEYWORDS_INDEXADAS: ${result.found.length}/${result.keywords.length}]`,
+    "",
+    "[CABEÇALHO_DETECTADO]",
+    `  CANDIDATO: ${result.resume.name.toUpperCase()}`,
+    `  CONTATOS : ${result.resume.contact.join(" | ") || "NÃO DETECTADO"}`,
+    "",
+    `[HARD_SKILLS_MATCHED (${result.found.length})]`,
+    `  ${result.found.length ? result.found.join(", ") : "(nenhuma)"}`,
+    "",
+    `[SEÇÕES_LINEARIZADAS (${result.resume.sections.length})]`,
+  ];
+
+  for (const s of result.resume.sections) {
+    lines.push("", `[SEÇÃO: ${s.title}]`);
+    for (const l of s.lines) {
+      if (l) lines.push(`  ${l}`);
+    }
+  }
+
+  return lines.join("\n").trim();
+}
+
+export function analyze(
+  jobDescription: string,
+  resumeText: string,
+  niche: NicheId = "tech",
+): AnalysisResult {
+  const keywords = extractKeywords(jobDescription, niche);
   const resumeNorm = normalize(resumeText);
 
   const exactFound = keywords.filter((k) => containsTerm(resumeNorm, k));
@@ -392,8 +504,9 @@ export function analyze(jobDescription: string, resumeText: string): AnalysisRes
     else byKey.set("competencias", { title: "COMPETÊNCIAS TÉCNICAS", lines: [aligned] });
   }
 
+  const order = niche === "estagio" ? INTERN_SECTION_ORDER : SECTION_ORDER;
   const sections = [
-    ...SECTION_ORDER.flatMap((k) => (byKey.has(k) ? [byKey.get(k)!] : [])),
+    ...order.flatMap((k) => (byKey.has(k) ? [byKey.get(k)!] : [])),
     ...others,
   ].filter((s) => s.lines.length > 0);
 
@@ -403,6 +516,7 @@ export function analyze(jobDescription: string, resumeText: string): AnalysisRes
     sections,
   };
   const plainText = resumeToPlainText(resume);
+  const quality = analyzeWritingQuality(resume, resumeText);
 
   const optimizedFormat = formatScore(plainText, {
     ...parsed,
@@ -425,5 +539,17 @@ export function analyze(jobDescription: string, resumeText: string): AnalysisRes
     extractField(jobDescription, /^(empresa|company|contratante)\s*[:\-–]\s*(.+)/i) ??
     "Não informada";
 
-  return { jobTitle, company, keywords, found, missing, initialScore, score, resume, plainText };
+  return {
+    niche,
+    jobTitle,
+    company,
+    keywords,
+    found,
+    missing,
+    initialScore,
+    score,
+    quality,
+    resume,
+    plainText,
+  };
 }

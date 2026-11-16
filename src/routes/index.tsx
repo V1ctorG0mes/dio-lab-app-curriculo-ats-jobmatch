@@ -2,16 +2,24 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import {
+  BarChart3,
   BookmarkPlus,
+  Bot,
   Briefcase,
   CheckCircle2,
+  Code2,
   Copy,
   Eraser,
+  FileDown,
   FileText,
   FlaskConical,
+  Gauge,
+  GraduationCap,
   Info,
   Printer,
+  Rocket,
   ScanSearch,
+  Target,
   TrendingUp,
   Zap,
 } from "lucide-react";
@@ -35,11 +43,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScoreRing } from "@/components/app/ScoreRing";
 import { PrintableResume, ResumeSheet } from "@/components/app/ResumeSheet";
+import { AtsXRayView } from "@/components/app/AtsXRayView";
 import { analyze, countWords, type AnalysisResult } from "@/lib/ats";
 import { addHistoryEntry } from "@/lib/history";
 import { readResumeFile } from "@/lib/resume-file";
+import { downloadResumeDocx } from "@/lib/resume-docx";
 import { ResumeUpload, type UploadedFileInfo } from "@/components/app/ResumeUpload";
-import { SAMPLE_JOB_FRONTEND, SAMPLE_RESUME_FRONTEND } from "@/lib/samples";
+import { NICHES, getSampleForNiche, type NicheId } from "@/lib/samples";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -64,34 +75,61 @@ export const Route = createFileRoute("/")({
 
 // Keeps the inputs while navigating between pages (client-only, in memory).
 const draft: {
+  niche: NicheId;
   job: string;
   resume: string;
   result: AnalysisResult | null;
   file: (UploadedFileInfo & { text: string }) | null;
 } = {
+  niche: "tech",
   job: "",
   resume: "",
   result: null,
   file: null,
 };
 
+const NICHE_ICONS: Record<NicheId, ReactNode> = {
+  tech: <Code2 className="size-3.5" />,
+  dados: <BarChart3 className="size-3.5" />,
+  produto: <Rocket className="size-3.5" />,
+  negocios: <Briefcase className="size-3.5" />,
+  estagio: <GraduationCap className="size-3.5" />,
+};
+
 function OptimizerPage() {
+  const [niche, setNiche] = useState<NicheId>(draft.niche);
   const [job, setJob] = useState(draft.job);
   const [resume, setResume] = useState(draft.resume);
   const [result, setResult] = useState<AnalysisResult | null>(draft.result);
   const [saveOpen, setSaveOpen] = useState(false);
   const [file, setFile] = useState(draft.file);
   const [reading, setReading] = useState(false);
+  const [downloadingDocx, setDownloadingDocx] = useState(false);
 
   const update = (next: Partial<typeof draft>) => Object.assign(draft, next);
 
+  const selectNiche = (nextNiche: NicheId) => {
+    setNiche(nextNiche);
+    if (result && countWords(job) >= 15 && countWords(resume) >= 15) {
+      const updatedResult = analyze(job, resume, nextNiche);
+      setResult(updatedResult);
+      update({ niche: nextNiche, result: updatedResult });
+    } else {
+      update({ niche: nextNiche });
+    }
+  };
+
   const loadExample = () => {
-    setJob(SAMPLE_JOB_FRONTEND);
-    setResume(SAMPLE_RESUME_FRONTEND);
+    const sample = getSampleForNiche(niche);
+    const nicheInfo = NICHES.find((n) => n.id === niche);
+    setJob(sample.job);
+    setResume(sample.resume);
     setResult(null);
     setFile(null);
-    update({ job: SAMPLE_JOB_FRONTEND, resume: SAMPLE_RESUME_FRONTEND, result: null, file: null });
-    toast.success("Exemplo carregado", { description: "Agora clique em Analisar Match." });
+    update({ job: sample.job, resume: sample.resume, result: null, file: null });
+    toast.success(`Exemplo de ${nicheInfo?.shortLabel ?? "teste"} carregado`, {
+      description: "Agora clique em Analisar Match.",
+    });
   };
 
   const clearAll = () => {
@@ -134,7 +172,7 @@ function OptimizerPage() {
   const tooShort = countWords(job) < 15 || countWords(resume) < 15;
 
   const runAnalysis = () => {
-    const r = analyze(job, resume);
+    const r = analyze(job, resume, niche);
     setResult(r);
     update({ result: r });
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
@@ -153,6 +191,23 @@ function OptimizerPage() {
       toast.error("Não foi possível copiar automaticamente.");
     }
   };
+
+  const exportDocx = async () => {
+    if (!result || downloadingDocx) return;
+    setDownloadingDocx(true);
+    try {
+      const fileName = await downloadResumeDocx(result.resume);
+      toast.success("Download do arquivo Word (.docx) iniciado!", {
+        description: `${fileName} salvo em formato coluna única compatível com ATS.`,
+      });
+    } catch {
+      toast.error("Não foi possível gerar o arquivo .docx.");
+    } finally {
+      setDownloadingDocx(false);
+    }
+  };
+
+  const activeNiche = NICHES.find((n) => n.id === niche)!;
 
   return (
     <div className="bg-hero">
@@ -182,7 +237,34 @@ function OptimizerPage() {
           </div>
         </div>
 
-        <div className="mt-8 grid gap-6 lg:grid-cols-2">
+        {/* Niche / Area Selector */}
+        <div className="mt-6 flex flex-col gap-2 rounded-2xl border border-primary-border/80 bg-surface/90 p-3 shadow-soft sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Área profissional">
+            {NICHES.map((n) => {
+              const selected = n.id === niche;
+              return (
+                <button
+                  key={n.id}
+                  type="button"
+                  onClick={() => selectNiche(n.id)}
+                  aria-pressed={selected}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors",
+                    selected
+                      ? "bg-primary text-primary-foreground shadow-xs"
+                      : "bg-primary-soft/70 text-primary-strong hover:bg-primary-soft",
+                  )}
+                >
+                  {NICHE_ICONS[n.id]}
+                  {n.label}
+                </button>
+              );
+            })}
+          </div>
+          <p className="px-1 text-xs text-muted-foreground">{activeNiche.description}</p>
+        </div>
+
+        <div className="mt-6 grid gap-6 lg:grid-cols-2">
           {/* Inputs */}
           <div className="space-y-5">
             <InputCard
@@ -246,6 +328,14 @@ function OptimizerPage() {
                       <Button variant="subtle" size="sm" onClick={copyText}>
                         <Copy /> Copiar Texto
                       </Button>
+                      <Button
+                        variant="subtle"
+                        size="sm"
+                        disabled={downloadingDocx}
+                        onClick={exportDocx}
+                      >
+                        <FileDown /> {downloadingDocx ? "Gerando .DOCX..." : "Baixar .DOCX"}
+                      </Button>
                       <Button variant="subtle" size="sm" onClick={() => window.print()}>
                         <Printer /> Imprimir / Salvar PDF
                       </Button>
@@ -256,12 +346,15 @@ function OptimizerPage() {
                   </CardHeader>
                   <CardContent>
                     <Tabs defaultValue="preview">
-                      <TabsList className="mb-3 rounded-xl bg-primary-soft">
+                      <TabsList className="mb-3 flex-wrap rounded-xl bg-primary-soft">
                         <TabsTrigger value="preview" className="rounded-lg">
                           Pré-visualização A4
                         </TabsTrigger>
                         <TabsTrigger value="text" className="rounded-lg">
                           Texto puro
+                        </TabsTrigger>
+                        <TabsTrigger value="xray" className="rounded-lg">
+                          <Bot className="mr-1.5 size-3.5" /> Visão Raio-X do Robô
                         </TabsTrigger>
                       </TabsList>
                       <TabsContent value="preview">
@@ -278,6 +371,9 @@ function OptimizerPage() {
                         <p className="mt-2 text-xs text-muted-foreground">
                           Ideal para colar em formulários como Gupy, Kenoby e LinkedIn.
                         </p>
+                      </TabsContent>
+                      <TabsContent value="xray">
+                        <AtsXRayView result={result} />
                       </TabsContent>
                     </Tabs>
                   </CardContent>
@@ -408,6 +504,65 @@ function DiagnosisCard({ result }: { result: AnalysisResult }) {
               ))
             ) : (
               <span className="text-sm text-muted-foreground">Nada faltando. 🎯</span>
+            )}
+          </div>
+        </div>
+
+        {/* Action Verbs & Impact Metrics */}
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="rounded-xl border border-primary-border/70 bg-primary-soft/40 p-3.5">
+            <div className="flex items-center justify-between gap-2">
+              <span className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
+                <Target className="size-3.5 text-primary" /> Verbos de Ação
+              </span>
+              <Badge variant={result.quality.actionVerbRate >= 60 ? "success" : "lavender"} className="tabular-nums">
+                {result.quality.actionVerbRate}%
+              </Badge>
+            </div>
+            <Progress
+              value={result.quality.actionVerbRate}
+              className="mt-2 h-1.5 bg-primary-soft [&>div]:bg-primary"
+            />
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              {result.quality.totalBullets > 0
+                ? `${result.quality.actionVerbBullets} de ${result.quality.totalBullets} tópicos iniciam com verbo forte.`
+                : "Adicione tópicos (- ) nas experiências para medir verbos de ação."}
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-primary-border/70 bg-primary-soft/40 p-3.5">
+            <div className="flex items-center justify-between gap-2">
+              <span className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
+                <Gauge className="size-3.5 text-success-strong" /> Métricas de Impacto
+              </span>
+              <Badge
+                variant={result.quality.impactMetricsCount >= 2 ? "success" : "lavender"}
+                className="tabular-nums"
+              >
+                {result.quality.impactMetricsCount}{" "}
+                {result.quality.impactMetricsCount === 1 ? "métrica" : "métricas"}
+              </Badge>
+            </div>
+            {result.quality.detectedMetrics.length > 0 ? (
+              <div className="mt-2 flex flex-wrap gap-1">
+                {result.quality.detectedMetrics.slice(0, 5).map((m) => (
+                  <span
+                    key={m}
+                    className="rounded-md bg-success-soft px-1.5 py-0.5 text-[10px] font-semibold text-success-strong"
+                  >
+                    {m}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-2 text-[11px] text-muted-foreground">
+                Nenhuma métrica numérica detectada ainda.
+              </p>
+            )}
+            {result.quality.impactMetricsCount < 2 && (
+              <p className="mt-2 text-[11px] text-primary-strong">
+                Dica ATS: inclua números, porcentagens (%) ou prazos nos resultados.
+              </p>
             )}
           </div>
         </div>

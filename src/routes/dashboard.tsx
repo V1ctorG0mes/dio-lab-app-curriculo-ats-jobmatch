@@ -3,7 +3,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
-import { BarChart3, Copy, Eye, FileSearch, Plus, Printer, Target, Trash2, Trophy } from "lucide-react";
+import { BarChart3, Copy, Eye, FileDown, FileSearch, Plus, Printer, Target, Trash2, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,6 +42,7 @@ import {
 } from "@/components/ui/chart";
 import { PrintableResume, ResumeSheet } from "@/components/app/ResumeSheet";
 import { removeHistoryEntry, summarize, useHistory, type HistoryEntry } from "@/lib/history";
+import { downloadResumeDocx } from "@/lib/resume-docx";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -292,6 +293,8 @@ function KpiCard(props: {
 }
 
 function ResumeDialog({ entry, onClose }: { entry: HistoryEntry | null; onClose: () => void }) {
+  const [downloading, setDownloading] = useState(false);
+
   const copy = async () => {
     if (!entry) return;
     try {
@@ -301,6 +304,22 @@ function ResumeDialog({ entry, onClose }: { entry: HistoryEntry | null; onClose:
       toast.error("Não foi possível copiar automaticamente.");
     }
   };
+
+  const exportDocx = async () => {
+    if (!entry || downloading) return;
+    setDownloading(true);
+    try {
+      const fileName = await downloadResumeDocx(entry.resume);
+      toast.success("Download do arquivo Word (.docx) iniciado!", {
+        description: `${fileName} salvo em formato ATS.`,
+      });
+    } catch {
+      toast.error("Não foi possível gerar o arquivo .docx.");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <Dialog open={!!entry} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-h-[92vh] max-w-4xl overflow-hidden rounded-2xl p-0">
@@ -313,9 +332,12 @@ function ResumeDialog({ entry, onClose }: { entry: HistoryEntry | null; onClose:
                 <Badge variant={entry.score >= 75 ? "success" : "lavender"}>{entry.score}% match</Badge>
                 <span className="text-xs">antes: {entry.initialScore}%</span>
               </DialogDescription>
-              <div className="flex gap-2 pt-2">
+              <div className="flex flex-wrap gap-2 pt-2">
                 <Button variant="subtle" size="sm" onClick={copy}>
                   <Copy /> Copiar Texto
+                </Button>
+                <Button variant="subtle" size="sm" disabled={downloading} onClick={exportDocx}>
+                  <FileDown /> {downloading ? "Gerando .DOCX..." : "Baixar .DOCX"}
                 </Button>
                 <Button variant="subtle" size="sm" onClick={() => window.print()}>
                   <Printer /> Imprimir / Salvar PDF
