@@ -37,6 +37,8 @@ import { ScoreRing } from "@/components/app/ScoreRing";
 import { PrintableResume, ResumeSheet } from "@/components/app/ResumeSheet";
 import { analyze, countWords, type AnalysisResult } from "@/lib/ats";
 import { addHistoryEntry } from "@/lib/history";
+import { readResumeFile } from "@/lib/resume-file";
+import { ResumeUpload, type UploadedFileInfo } from "@/components/app/ResumeUpload";
 import { SAMPLE_JOB_FRONTEND, SAMPLE_RESUME_FRONTEND } from "@/lib/samples";
 
 export const Route = createFileRoute("/")({
@@ -61,10 +63,16 @@ export const Route = createFileRoute("/")({
 });
 
 // Keeps the inputs while navigating between pages (client-only, in memory).
-const draft: { job: string; resume: string; result: AnalysisResult | null } = {
+const draft: {
+  job: string;
+  resume: string;
+  result: AnalysisResult | null;
+  file: (UploadedFileInfo & { text: string }) | null;
+} = {
   job: "",
   resume: "",
   result: null,
+  file: null,
 };
 
 function OptimizerPage() {
@@ -72,6 +80,8 @@ function OptimizerPage() {
   const [resume, setResume] = useState(draft.resume);
   const [result, setResult] = useState<AnalysisResult | null>(draft.result);
   const [saveOpen, setSaveOpen] = useState(false);
+  const [file, setFile] = useState(draft.file);
+  const [reading, setReading] = useState(false);
 
   const update = (next: Partial<typeof draft>) => Object.assign(draft, next);
 
@@ -79,7 +89,8 @@ function OptimizerPage() {
     setJob(SAMPLE_JOB_FRONTEND);
     setResume(SAMPLE_RESUME_FRONTEND);
     setResult(null);
-    update({ job: SAMPLE_JOB_FRONTEND, resume: SAMPLE_RESUME_FRONTEND, result: null });
+    setFile(null);
+    update({ job: SAMPLE_JOB_FRONTEND, resume: SAMPLE_RESUME_FRONTEND, result: null, file: null });
     toast.success("Exemplo carregado", { description: "Agora clique em Analisar Match." });
   };
 
@@ -87,7 +98,37 @@ function OptimizerPage() {
     setJob("");
     setResume("");
     setResult(null);
-    update({ job: "", resume: "", result: null });
+    setFile(null);
+    update({ job: "", resume: "", result: null, file: null });
+  };
+
+  const handleFile = async (f: File) => {
+    setReading(true);
+    try {
+      const text = await readResumeFile(f);
+      const info = { name: f.name, size: f.size, text };
+      setResume(text);
+      setFile(info);
+      update({ resume: text, file: info });
+      const n = countWords(text);
+      toast.success(`Currículo carregado com sucesso (${n} ${n === 1 ? "palavra lida" : "palavras lidas"})`, {
+        description: "Revise o texto abaixo antes de analisar.",
+      });
+    } catch (err) {
+      toast.error("Não foi possível ler o arquivo", {
+        description: err instanceof Error ? err.message : "Tente outro arquivo ou cole o texto.",
+      });
+    } finally {
+      setReading(false);
+    }
+  };
+
+  const removeFile = () => {
+    // Only clear the text if the user hasn't edited what came from the file.
+    const keepEdits = file && resume !== file.text;
+    setFile(null);
+    if (!keepEdits) setResume("");
+    update({ file: null, ...(keepEdits ? {} : { resume: "" }) });
   };
 
   const tooShort = countWords(job) < 15 || countWords(resume) < 15;
@@ -158,9 +199,17 @@ function OptimizerPage() {
             <InputCard
               icon={<FileText className="size-4" />}
               title="Seu currículo atual"
-              description="Texto simples ou markdown. Pode colar do Word ou LinkedIn."
+              description="Envie um arquivo ou cole o texto (Word, LinkedIn, markdown)."
               value={resume}
-              placeholder={"Seu Nome\nemail | telefone\n\nExperiência Profissional\n..."}
+              placeholder={"Ou cole/digite aqui:\n\nSeu Nome\nemail | telefone\n\nExperiência Profissional\n..."}
+              top={
+                <ResumeUpload
+                  file={file}
+                  loading={reading}
+                  onFile={handleFile}
+                  onRemove={removeFile}
+                />
+              }
               onChange={(v) => {
                 setResume(v);
                 update({ resume: v });
@@ -253,6 +302,7 @@ function InputCard(props: {
   value: string;
   placeholder: string;
   onChange: (v: string) => void;
+  top?: ReactNode;
 }) {
   const words = countWords(props.value);
   return (
@@ -271,7 +321,8 @@ function InputCard(props: {
           {words} {words === 1 ? "palavra" : "palavras"}
         </Badge>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-3">
+        {props.top}
         <Textarea
           value={props.value}
           onChange={(e) => props.onChange(e.target.value)}

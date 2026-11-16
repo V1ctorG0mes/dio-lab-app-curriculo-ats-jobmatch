@@ -28,3 +28,7 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+
+- Résumé files (.txt/.md/.docx/.pdf) are parsed only in the browser via `src/lib/resume-file.ts`, with `mammoth` and `pdfjs-dist` loaded by dynamic `import()` inside the read function — keeps them out of SSR and the initial bundle, and nothing is uploaded to a server.
