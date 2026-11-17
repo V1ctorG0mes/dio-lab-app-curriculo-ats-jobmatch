@@ -33,7 +33,7 @@
 
   <br/><br/>
   <h3>3. Os 5 Mandamentos para Passar pelo Robô ATS</h3>
-  <img src="docs/screenshots/03-mandamentos-ats.jpg" alt="5 Mandamentos ATS" width="70%" />
+  <img src="docs/screenshots/03-mandamentos-ats.png" alt="5 Mandamentos ATS" width="70%" />
 </div>
 
 ---
