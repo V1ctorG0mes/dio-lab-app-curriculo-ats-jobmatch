@@ -1,4 +1,5 @@
 import type { UploadedFileInfo } from "@/components/app/ResumeUpload";
+import { useSyncExternalStore } from "react";
 import { analyze, type AnalysisResult } from "./ats";
 import type { NicheId } from "./samples";
 
@@ -18,8 +19,30 @@ export const draft: OptimizerDraft = {
   file: null,
 };
 
+const emptySnapshot = { ...draft };
+let snapshot = { ...draft };
+const listeners = new Set<() => void>();
+
 export function updateDraft(next: Partial<OptimizerDraft>) {
-  Object.assign(draft, next);
+  const inputsChanged =
+    (next.job !== undefined && next.job !== draft.job) ||
+    (next.resume !== undefined && next.resume !== draft.resume);
+  Object.assign(draft, next, inputsChanged && next.result === undefined ? { result: null } : {});
+  snapshot = { ...draft };
+  listeners.forEach((listener) => listener());
+}
+
+export function useOptimizerDraft() {
+  return useSyncExternalStore(
+    (listener) => {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+    () => snapshot,
+    () => emptySnapshot,
+  );
 }
 
 /**

@@ -32,3 +32,4 @@ use the editor.
 ## Project rules
 
 - Résumé files (.txt/.md/.docx/.pdf) are parsed only in the browser via `src/lib/resume-file.ts`, with `mammoth` and `pdfjs-dist` loaded by dynamic `import()` inside the read function — keeps them out of SSR and the initial bundle, and nothing is uploaded to a server.
+- The Radar reads the observable in-memory Optimizer draft and never accepts résumé input; role recommendations combine keyword coverage with reference-job overlap, without treating formatting scores as qualifications or profiles as real listings.

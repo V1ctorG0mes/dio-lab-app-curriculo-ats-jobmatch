@@ -52,6 +52,7 @@ import { downloadResumeDocx } from "@/lib/resume-docx";
 import { ResumeUpload } from "@/components/app/ResumeUpload";
 import { NICHES, getSampleForNiche, type NicheId } from "@/lib/samples";
 import { draft, updateDraft } from "@/lib/draft";
+import { hasRadarInputs } from "@/lib/jobs-radar";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
@@ -66,7 +67,8 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Otimizador ATS — JobMatch ATS" },
       {
         property: "og:description",
-        content: "Score de match, palavras-chave faltantes e currículo limpo em A4 para sistemas ATS.",
+        content:
+          "Score de match, palavras-chave faltantes e currículo limpo em A4 para sistemas ATS.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -134,11 +136,15 @@ function OptimizerPage() {
       const info = { name: f.name, size: f.size, text };
       setResume(text);
       setFile(info);
+      setResult(null);
       update({ resume: text, file: info });
       const n = countWords(text);
-      toast.success(`Currículo carregado com sucesso (${n} ${n === 1 ? "palavra lida" : "palavras lidas"})`, {
-        description: "Revise o texto abaixo antes de analisar.",
-      });
+      toast.success(
+        `Currículo carregado com sucesso (${n} ${n === 1 ? "palavra lida" : "palavras lidas"})`,
+        {
+          description: "Revise o texto abaixo antes de analisar.",
+        },
+      );
     } catch (err) {
       toast.error("Não foi possível ler o arquivo", {
         description: err instanceof Error ? err.message : "Tente outro arquivo ou cole o texto.",
@@ -152,6 +158,7 @@ function OptimizerPage() {
     // Only clear the text if the user hasn't edited what came from the file.
     const keepEdits = file && resume !== file.text;
     setFile(null);
+    setResult(null);
     if (!keepEdits) setResume("");
     update({ file: null, ...(keepEdits ? {} : { resume: "" }) });
   };
@@ -194,7 +201,7 @@ function OptimizerPage() {
     }
   };
 
-  const activeNiche = NICHES.find((n) => n.id === niche)!;
+  const activeNiche = NICHES.find((n) => n.id === niche) ?? NICHES[0];
 
   return (
     <div className="bg-hero">
@@ -213,10 +220,10 @@ function OptimizerPage() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            {countWords(resume) >= 15 && (
+            {hasRadarInputs(job, resume) && (
               <Button variant="subtle" asChild>
                 <Link to="/radar">
-                  <Radar /> Ver vagas no Radar
+                  <Radar /> Ver cargos compatíveis
                 </Link>
               </Button>
             )}
@@ -233,7 +240,11 @@ function OptimizerPage() {
 
         {/* Niche / Area Selector */}
         <div className="mt-6 flex flex-col gap-2 rounded-2xl border border-primary-border/80 bg-surface/90 p-3 shadow-soft sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Área profissional">
+          <div
+            className="flex flex-wrap items-center gap-1.5"
+            role="group"
+            aria-label="Área profissional"
+          >
             {NICHES.map((n) => {
               const selected = n.id === niche;
               return (
@@ -255,7 +266,7 @@ function OptimizerPage() {
               );
             })}
           </div>
-          <p className="px-1 text-xs text-muted-foreground">{activeNiche.description}</p>
+          <p className="px-1 text-xs text-muted-foreground">{activeNiche?.description}</p>
         </div>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
@@ -269,6 +280,7 @@ function OptimizerPage() {
               placeholder={"Vaga: Desenvolvedor(a) Frontend\nEmpresa: ...\n\nRequisitos..."}
               onChange={(v) => {
                 setJob(v);
+                setResult(null);
                 update({ job: v });
               }}
             />
@@ -277,7 +289,9 @@ function OptimizerPage() {
               title="Seu currículo atual"
               description="Envie um arquivo ou cole o texto (Word, LinkedIn, markdown)."
               value={resume}
-              placeholder={"Ou cole/digite aqui:\n\nSeu Nome\nemail | telefone\n\nExperiência Profissional\n..."}
+              placeholder={
+                "Ou cole/digite aqui:\n\nSeu Nome\nemail | telefone\n\nExperiência Profissional\n..."
+              }
               top={
                 <ResumeUpload
                   file={file}
@@ -288,6 +302,7 @@ function OptimizerPage() {
               }
               onChange={(v) => {
                 setResume(v);
+                setResult(null);
                 update({ resume: v });
               }}
             />
@@ -445,12 +460,17 @@ function DiagnosisCard({ result }: { result: AnalysisResult }) {
                 <span>Antes (currículo original)</span>
                 <span className="tabular-nums">{result.initialScore}%</span>
               </div>
-              <Progress value={result.initialScore} className="h-2 bg-primary-soft [&>div]:bg-primary-border" />
+              <Progress
+                value={result.initialScore}
+                className="h-2 bg-primary-soft [&>div]:bg-primary-border"
+              />
             </div>
             <div>
               <div className="mb-1 flex justify-between text-xs text-muted-foreground">
                 <span>Depois (otimizado para ATS)</span>
-                <span className="font-semibold tabular-nums text-success-strong">{result.score}%</span>
+                <span className="font-semibold tabular-nums text-success-strong">
+                  {result.score}%
+                </span>
               </div>
               <Progress value={result.score} className="h-2 bg-success-soft [&>div]:bg-success" />
             </div>
@@ -493,7 +513,9 @@ function DiagnosisCard({ result }: { result: AnalysisResult }) {
                       {k}
                     </Badge>
                   </TooltipTrigger>
-                  <TooltipContent>Adicione só se você realmente tem essa experiência.</TooltipContent>
+                  <TooltipContent>
+                    Adicione só se você realmente tem essa experiência.
+                  </TooltipContent>
                 </Tooltip>
               ))
             ) : (
@@ -509,7 +531,10 @@ function DiagnosisCard({ result }: { result: AnalysisResult }) {
               <span className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
                 <Target className="size-3.5 text-primary" /> Verbos de Ação
               </span>
-              <Badge variant={result.quality.actionVerbRate >= 60 ? "success" : "lavender"} className="tabular-nums">
+              <Badge
+                variant={result.quality.actionVerbRate >= 60 ? "success" : "lavender"}
+                className="tabular-nums"
+              >
                 {result.quality.actionVerbRate}%
               </Badge>
             </div>

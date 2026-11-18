@@ -1,43 +1,21 @@
-/**
- * Client-side Job Matchmaking Radar ("Radar de Vagas Compatíveis").
- * Evaluates a curated catalog of fictional opportunities across all niches
- * using the deterministic ATS scoring engine — never inventing qualifications.
- */
+/** Browser-only role recommendations. Profiles are illustrative, never job listings. */
 import { analyze, countWords, normalize } from "./ats";
 import type { NicheId } from "./samples";
 
-export type WorkModel = "Remoto" | "Híbrido" | "Presencial";
-export type SeniorityLevel = "Estágio" | "Júnior" | "Pleno" | "Sênior";
 export type MatchTier = "alta" | "media" | "baixa";
-
-export type RadarJob = {
-  id: string;
-  title: string;
-  company: string;
-  niche: NicheId;
-  seniority: SeniorityLevel;
-  workModel: WorkModel;
-  location: string;
-  salaryRange: string;
-  postedDaysAgo: number;
-  description: string;
-};
-
-export type JobMatchItem = RadarJob & {
+export type RoleProfile = { id: string; title: string; niche: NicheId; description: string };
+export type JobMatchItem = RoleProfile & {
   score: number;
-  initialScore: number;
+  referenceScore: number;
+  rankScore: number;
   keywords: string[];
   found: string[];
   missing: string[];
+  sharedWithReference: string[];
   matchTier: MatchTier;
+  source: "referencia" | "perfil";
 };
-
-export type RadarFilterOptions = {
-  niche?: NicheId | "all";
-  workModel?: WorkModel | "all";
-  search?: string;
-};
-
+export type RadarFilterOptions = { niche?: NicheId | "all"; search?: string };
 export type RadarSummary = {
   total: number;
   highMatchCount: number;
@@ -45,23 +23,20 @@ export type RadarSummary = {
   averageScore: number;
 };
 
-export const RADAR_JOBS: RadarJob[] = [
+export function hasRadarInputs(job: string, resume: string): boolean {
+  return countWords(job) >= 15 && countWords(resume) >= 15;
+}
+
+export const RADAR_PROFILES: RoleProfile[] = [
   // --- TECH ---
   {
     id: "tech-react-pleno",
     title: "Desenvolvedor(a) Frontend React Pleno",
-    company: "Nuvem Pay",
     niche: "tech",
-    seniority: "Pleno",
-    workModel: "Remoto",
-    location: "Remoto (Brasil)",
-    salaryRange: "R$ 8.500 – R$ 11.500",
-    postedDaysAgo: 1,
     description: `Vaga: Desenvolvedor(a) Frontend React Pleno
-Empresa: Nuvem Pay
 
 Sobre a vaga
-Buscamos pessoa desenvolvedora Frontend para evoluir nossa plataforma B2B de pagamentos usada por mais de 4 mil empresas.
+Buscamos pessoa desenvolvedora Frontend para evoluir uma plataforma B2B de pagamentos.
 
 Responsabilidades
 - Desenvolver interfaces com React, TypeScript e Next.js
@@ -81,15 +56,8 @@ Diferenciais
   {
     id: "tech-fullstack-ts",
     title: "Engenheiro(a) Fullstack TypeScript & Node.js",
-    company: "FinTech Verde",
     niche: "tech",
-    seniority: "Pleno",
-    workModel: "Híbrido",
-    location: "São Paulo, SP",
-    salaryRange: "R$ 10.000 – R$ 13.500",
-    postedDaysAgo: 2,
     description: `Vaga: Engenheiro(a) Fullstack TypeScript & Node.js
-Empresa: FinTech Verde
 
 Responsabilidades
 - Construir aplicações web escaláveis com React, TypeScript e Node.js
@@ -105,15 +73,8 @@ Requisitos
   {
     id: "tech-backend-java",
     title: "Desenvolvedor(a) Backend Java & Spring Boot",
-    company: "CredFácil",
     niche: "tech",
-    seniority: "Sênior",
-    workModel: "Remoto",
-    location: "Remoto (Brasil)",
-    salaryRange: "R$ 13.000 – R$ 16.500",
-    postedDaysAgo: 4,
     description: `Vaga: Desenvolvedor(a) Backend Java & Spring Boot
-Empresa: CredFácil
 
 Responsabilidades
 - Arquitetar microsserviços financeiros de alta disponibilidade em Java e Spring Boot
@@ -131,15 +92,8 @@ Requisitos
   {
     id: "dados-bi-pleno",
     title: "Analista de Dados & BI Pleno",
-    company: "Varejo Norte",
     niche: "dados",
-    seniority: "Pleno",
-    workModel: "Híbrido",
-    location: "Recife, PE",
-    salaryRange: "R$ 6.500 – R$ 8.500",
-    postedDaysAgo: 1,
     description: `Vaga: Analista de Dados & BI Pleno
-Empresa: Varejo Norte
 
 Responsabilidades
 - Construir dashboards estratégicos em Power BI para diretoria e áreas comerciais
@@ -155,15 +109,8 @@ Requisitos
   {
     id: "dados-engenharia-etl",
     title: "Engenheiro(a) de Dados (Python, SQL & Cloud)",
-    company: "Orbita Dados",
     niche: "dados",
-    seniority: "Pleno",
-    workModel: "Remoto",
-    location: "Remoto (Brasil)",
-    salaryRange: "R$ 9.500 – R$ 12.500",
-    postedDaysAgo: 3,
     description: `Vaga: Engenheiro(a) de Dados
-Empresa: Orbita Dados
 
 Responsabilidades
 - Desenvolver pipelines de ETL escaláveis em Python e SQL (BigQuery / PostgreSQL)
@@ -178,15 +125,8 @@ Requisitos
   {
     id: "dados-ciencia-ml",
     title: "Cientista de Dados & Machine Learning",
-    company: "LogiSmart",
     niche: "dados",
-    seniority: "Sênior",
-    workModel: "Remoto",
-    location: "Remoto (Brasil)",
-    salaryRange: "R$ 12.000 – R$ 15.500",
-    postedDaysAgo: 5,
     description: `Vaga: Cientista de Dados & Machine Learning
-Empresa: LogiSmart
 
 Responsabilidades
 - Desenvolver modelos preditivos de Machine Learning em Python (Pandas) para roteirização logística
@@ -203,15 +143,8 @@ Requisitos
   {
     id: "produto-pm-saas",
     title: "Product Manager (SaaS B2B)",
-    company: "Saúde+ App",
     niche: "produto",
-    seniority: "Pleno",
-    workModel: "Remoto",
-    location: "Remoto (Brasil)",
-    salaryRange: "R$ 10.500 – R$ 14.000",
-    postedDaysAgo: 1,
     description: `Vaga: Product Manager (SaaS B2B)
-Empresa: Saúde+ App
 
 Responsabilidades
 - Definir o roadmap do produto e liderar ciclos de OKRs trimestrais
@@ -228,15 +161,8 @@ Requisitos
   {
     id: "produto-po-agile",
     title: "Product Owner (Plataforma Financeira)",
-    company: "Banco Ágil",
     niche: "produto",
-    seniority: "Pleno",
-    workModel: "Híbrido",
-    location: "São Paulo, SP",
-    salaryRange: "R$ 8.500 – R$ 11.000",
-    postedDaysAgo: 2,
     description: `Vaga: Product Owner
-Empresa: Banco Ágil
 
 Responsabilidades
 - Gerenciar e priorizar o backlog de duas squads usando Scrum e Kanban no Jira
@@ -250,15 +176,8 @@ Requisitos
   {
     id: "produto-growth",
     title: "Product Manager de Growth & Experimentação",
-    company: "Loja Ágil",
     niche: "produto",
-    seniority: "Pleno",
-    workModel: "Remoto",
-    location: "Remoto (Brasil)",
-    salaryRange: "R$ 9.500 – R$ 12.500",
-    postedDaysAgo: 4,
     description: `Vaga: Product Manager de Growth & Experimentação
-Empresa: Loja Ágil
 
 Responsabilidades
 - Liderar experimentos de testes A/B para aumentar conversão e retenção em SaaS
@@ -274,15 +193,8 @@ Requisitos
   {
     id: "negocios-financeiro-erp",
     title: "Analista Financeiro & Operações Pleno",
-    company: "Grupo Horizonte",
     niche: "negocios",
-    seniority: "Pleno",
-    workModel: "Híbrido",
-    location: "Curitiba, PR",
-    salaryRange: "R$ 5.800 – R$ 7.500",
-    postedDaysAgo: 2,
     description: `Vaga: Analista Financeiro & Operações Pleno
-Empresa: Grupo Horizonte
 
 Responsabilidades
 - Conduzir fechamento mensal, análise de DRE e controle de fluxo de caixa
@@ -298,15 +210,8 @@ Requisitos
   {
     id: "negocios-operacoes-crm",
     title: "Analista de Operações Comerciais & CRM",
-    company: "Varejo Express",
     niche: "negocios",
-    seniority: "Júnior",
-    workModel: "Presencial",
-    location: "Belo Horizonte, MG",
-    salaryRange: "R$ 4.200 – R$ 5.500",
-    postedDaysAgo: 3,
     description: `Vaga: Analista de Operações Comerciais & CRM
-Empresa: Varejo Express
 
 Responsabilidades
 - Administrar funil de vendas no CRM e apoiar metas B2B com dashboards no Excel e Power BI
@@ -320,15 +225,8 @@ Requisitos
   {
     id: "negocios-controladoria-sr",
     title: "Especialista de Controladoria & FP&A",
-    company: "Indústria Brasil",
     niche: "negocios",
-    seniority: "Sênior",
-    workModel: "Híbrido",
-    location: "São Paulo, SP",
-    salaryRange: "R$ 9.000 – R$ 12.000",
-    postedDaysAgo: 5,
     description: `Vaga: Especialista de Controladoria & FP&A
-Empresa: Indústria Brasil
 
 Responsabilidades
 - Liderar o planejamento e controle orçamentário anual, DRE gerencial e fluxo de caixa
@@ -344,15 +242,8 @@ Requisitos
   {
     id: "estagio-dev-web",
     title: "Estágio em Desenvolvimento de Software",
-    company: "EducaTech Brasil",
     niche: "estagio",
-    seniority: "Estágio",
-    workModel: "Remoto",
-    location: "Remoto (Brasil)",
-    salaryRange: "R$ 2.000 + bolsa auxílio",
-    postedDaysAgo: 1,
     description: `Vaga: Estágio em Desenvolvimento de Software
-Empresa: EducaTech Brasil
 
 Atividades
 - Apoiar a criação de interfaces responsivas com HTML, CSS, JavaScript e React
@@ -367,15 +258,8 @@ Requisitos
   {
     id: "estagio-dados-bi",
     title: "Estágio em Dados, BI & Automação",
-    company: "Conecta Educação",
     niche: "estagio",
-    seniority: "Estágio",
-    workModel: "Híbrido",
-    location: "Campinas, SP",
-    salaryRange: "R$ 1.900 + benefícios",
-    postedDaysAgo: 2,
     description: `Vaga: Estágio em Dados, BI & Automação
-Empresa: Conecta Educação
 
 Atividades
 - Apoiar a atualização de planilhas Excel, consultas em SQL e painéis em Power BI
@@ -390,15 +274,8 @@ Requisitos
   {
     id: "estagio-suporte-ti",
     title: "Júnior / Trainee em Suporte Técnico & Sistemas",
-    company: "Studio Pixel",
     niche: "estagio",
-    seniority: "Júnior",
-    workModel: "Presencial",
-    location: "Porto Alegre, RS",
-    salaryRange: "R$ 2.800 – R$ 3.500",
-    postedDaysAgo: 4,
     description: `Vaga: Trainee em Suporte Técnico & Sistemas
-Empresa: Studio Pixel
 
 Atividades
 - Prestar suporte técnico a usuários em Microsoft 365, hardware e redes
@@ -412,66 +289,68 @@ Requisitos
   },
 ];
 
-function classifyTier(score: number): MatchTier {
-  if (score >= 70) return "alta";
-  if (score >= 45) return "media";
-  return "baixa";
-}
-
-export function matchJobsToResume(
+/** Compatibility is keyword coverage, not the optimized formatting score. */
+export function generateJobRecommendations(
+  jobDescription: string,
   resumeText: string,
+  niche: NicheId,
   options: RadarFilterOptions = {},
 ): JobMatchItem[] {
-  const { niche = "all", workModel = "all", search = "" } = options;
-  const searchNorm = normalize(search.trim());
-  const hasResume = countWords(resumeText) >= 15;
-
-  const filtered = RADAR_JOBS.filter((job) => {
-    if (niche !== "all" && job.niche !== niche) return false;
-    if (workModel !== "all" && job.workModel !== workModel) return false;
-    if (searchNorm) {
-      const haystack = normalize(`${job.title} ${job.company} ${job.location} ${job.description}`);
-      if (!haystack.includes(searchNorm)) return false;
-    }
-    return true;
-  });
-
-  const matched = filtered.map((job): JobMatchItem => {
-    const analysis = analyze(job.description, hasResume ? resumeText : "", job.niche);
-    const score = hasResume ? analysis.score : 0;
-    const initialScore = hasResume ? analysis.initialScore : 0;
-    return {
-      ...job,
-      score,
-      initialScore,
-      keywords: analysis.keywords,
-      found: hasResume ? analysis.found : [],
-      missing: hasResume ? analysis.missing : analysis.keywords,
-      matchTier: classifyTier(score),
-    };
-  });
-
-  return matched.sort((a, b) => {
-    if (b.score !== a.score) return b.score - a.score;
-    if (b.found.length !== a.found.length) return b.found.length - a.found.length;
-    return a.postedDaysAgo - b.postedDaysAgo;
-  });
+  if (!hasRadarInputs(jobDescription, resumeText)) return [];
+  const reference = analyze(jobDescription, resumeText, niche);
+  const referenceTerms = new Set(reference.keywords.map(normalize));
+  const profiles: Array<RoleProfile & { source: JobMatchItem["source"] }> = [
+    {
+      id: "vaga-referencia",
+      title: reference.jobTitle,
+      niche,
+      description: jobDescription,
+      source: "referencia",
+    },
+    ...RADAR_PROFILES.map((profile) => ({ ...profile, source: "perfil" as const })),
+  ];
+  const search = normalize(options.search?.trim() ?? "");
+  return profiles
+    .flatMap((profile): JobMatchItem[] => {
+      if (options.niche && options.niche !== "all" && profile.niche !== options.niche) return [];
+      if (search && !normalize(`${profile.title} ${profile.description}`).includes(search))
+        return [];
+      const analysis = analyze(profile.description, resumeText, profile.niche);
+      const total = analysis.keywords.length;
+      if (!total) return [];
+      const score = Math.round((100 * analysis.found.length) / total);
+      // Never recommend a role on formatting or a single incidental keyword alone.
+      if (score < 35 || analysis.found.length < Math.min(2, total)) return [];
+      const sharedWithReference = analysis.keywords.filter((term) =>
+        referenceTerms.has(normalize(term)),
+      );
+      const referenceScore = Math.round((100 * sharedWithReference.length) / total);
+      return [
+        {
+          ...profile,
+          score,
+          referenceScore,
+          rankScore: Math.round(score * 0.8 + referenceScore * 0.2),
+          keywords: analysis.keywords,
+          found: analysis.found,
+          missing: analysis.missing,
+          sharedWithReference,
+          matchTier: score >= 70 ? "alta" : score >= 45 ? "media" : "baixa",
+        },
+      ];
+    })
+    .sort(
+      (a, b) => b.rankScore - a.rankScore || b.score - a.score || a.title.localeCompare(b.title),
+    );
 }
 
 export function summarizeRadarMatches(items: JobMatchItem[]): RadarSummary {
-  if (!items.length) {
-    return { total: 0, highMatchCount: 0, bestScore: 0, averageScore: 0 };
-  }
-  const highMatchCount = items.filter((item) => item.score >= 70).length;
-  const bestScore = Math.max(...items.map((item) => item.score));
-  const averageScore = Math.round(
-    items.reduce((acc, item) => acc + item.score, 0) / items.length,
-  );
-
   return {
     total: items.length,
-    highMatchCount,
-    bestScore,
-    averageScore,
+    highMatchCount: items.filter((item) => item.score >= 70).length,
+    bestScore: items.length ? Math.max(...items.map((item) => item.score)) : 0,
+    averageScore: items.length
+      ? Math.round(items.reduce((sum, item) => sum + item.score, 0) / items.length)
+      : 0,
   };
 }
